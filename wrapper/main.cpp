@@ -36,6 +36,7 @@
 #include <cassert>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 #include "tools.h"
 #include "target.h"
@@ -446,7 +447,7 @@ bool detectTarget(int argc, char **argv, Target &target) {
   else if (!strncmp(cmd, "oa64e", 5))
     target.arch = Arch::arm64e;
   else if (!strncmp(cmd, "oa64", 4))
-    target.arch = Arch::arm64;
+    target.arch = Arch::aarch64;
   else
     return false;
 
@@ -576,7 +577,7 @@ int main(int argc, char **argv) {
     return 0;
 
   if (rc == -1 && execvp(target.compilerpath.c_str(), cargs)) {
-    err << "invoking compiler failed" << err.endl();
+    err << "invoking compiler failed: " << strerror(errno) << err.endl();
 
     if (!debug)
       printCommand();

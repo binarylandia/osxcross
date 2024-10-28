@@ -546,6 +546,7 @@ bool Target::setup() {
   } RequiredSDKVersion[] = {
     { Arch::i386,    {10, 13}, true },
     { Arch::x86_64h, {10, 8} },
+    { Arch::aarch64, {11, 0} },
     { Arch::arm64,   {11, 0} },
     { Arch::arm64e,  {11, 0} },
   };
@@ -575,7 +576,7 @@ bool Target::setup() {
   if (!OSNum.Num()) {
     OSVersion defaultMinTarget = getDefaultMinTarget();
 
-    if (haveArch(Arch::arm64) || haveArch(Arch::arm64e)) {
+    if (haveArch(Arch::aarch64) || haveArch(Arch::arm64) || haveArch(Arch::arm64e)) {
       // Default to >= 11.0 for arm64
       OSNum = std::max(defaultMinTarget, OSVersion(11, 0));
     }
@@ -859,6 +860,9 @@ bool Target::setup() {
     case Arch::i686:
       is32bit = true;
       // falls through
+    case Arch::aarch64:
+      isArm = true;
+      // falls through
     case Arch::arm64:
       isArm = true;
       // falls through
@@ -868,12 +872,6 @@ bool Target::setup() {
     case Arch::x86_64:
     case Arch::x86_64h:
       if (isGCC()) {
-        if (arch != Arch::x86_64 && arch != Arch::i386) {
-          err << "gcc does not support architecture '" << getArchName(arch)
-              << "'" << err.endl();
-          return false;
-        }
-
         if (targetarch.size() > 1)
           break;
 

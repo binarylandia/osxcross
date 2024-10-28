@@ -15,6 +15,13 @@ DESC=gcc
 USESYSTEMCOMPILER=1
 source tools/tools.sh
 
+# architecture to target
+if [ -z "MY_TARGET_ARCH" ]; then
+  MY_TARGET_ARCH=x86_64
+fi
+
+TARGETTRIPLE="${MY_TARGET_ARCH}-apple-$TARGET"
+
 # GCC version to build
 # (<4.7 will not work properly with libc++)
 if [ -z "$GCC_VERSION" ]; then
@@ -41,7 +48,7 @@ function remove_locks()
 
 source $BASE_DIR/tools/trap_exit.sh
 
-if [ ! -f "have_gcc_${GCC_VERSION}_${TARGET}" ]; then
+if [ ! -f "have_gcc_${GCC_VERSION}_${TARGETTRIPLE}" ]; then
 
 pushd $TARBALL_DIR &>/dev/null
 if [[ $GCC_VERSION != *-* ]]; then
@@ -51,16 +58,21 @@ else
 fi
 popd &>/dev/null
 
-echo "cleaning up ..."
-rm -rf gcc* 2>/dev/null
+#echo "cleaning up ..."
+#rm -rf gcc-${GCC_VERSION}-${TARGETTRIPLE} 2>/dev/null
 
 extract "$TARBALL_DIR/gcc-$GCC_VERSION.tar.xz"
+
+if [ -d "gcc-$GCC_VERSION" ]; then
+  mv gcc-$GCC_VERSION gcc-${GCC_VERSION}-${TARGETTRIPLE}
+fi
+
 echo ""
 
-pushd gcc*$GCC_VERSION* &>/dev/null
+pushd gcc-${GCC_VERSION}-${TARGETTRIPLE} &>/dev/null
 
-rm -f $TARGET_DIR/bin/*-gcc*
-rm -f $TARGET_DIR/bin/*-g++*
+#rm -f $TARGET_DIR/bin/*${TARGETTRIPLE}*-gcc*
+#rm -f $TARGET_DIR/bin/*${TARGETTRIPLE}*-g++*
 
 if [ $(osxcross-cmp $GCC_VERSION '>' 5.0.0) -eq 1 ] &&
    [ $(osxcross-cmp $GCC_VERSION '<' 5.3.0) -eq 1 ]; then
@@ -77,6 +89,10 @@ fi
 if [ $(osxcross-cmp $GCC_VERSION '==' 6.3.0) -eq 1 ]; then
   # https://gcc.gnu.org/viewcvs/gcc/trunk/gcc/config/darwin-driver.c?r1=244010&r2=244009&pathrev=244010
   patch -p1 < $PATCH_DIR/darwin-driver.c.patch
+fi
+
+if [ $(osxcross-cmp $GCC_VERSION '==' 14.2.0) -eq 1 ]; then
+  patch -p1 < $PATCH_DIR/gcc-14.2.0-aarch64.diff
 fi
 
 if [ $(osxcross-cmp $SDK_VERSION '>=' 10.14) -eq 1 ] &&
@@ -118,8 +134,8 @@ fi
 EXTRACONFFLAGS=""
 
 if [ "$PLATFORM" != "Darwin" ]; then
-  EXTRACONFFLAGS+="--with-ld=$TARGET_DIR/bin/x86_64-apple-$TARGET-ld "
-  EXTRACONFFLAGS+="--with-as=$TARGET_DIR/bin/x86_64-apple-$TARGET-as "
+  EXTRACONFFLAGS+="--with-ld=$TARGET_DIR/bin/$TARGETTRIPLE-ld "
+  EXTRACONFFLAGS+="--with-as=$TARGET_DIR/bin/$TARGETTRIPLE-as "
 fi
 
 LANGS="c,c++,objc,obj-c++"
@@ -135,7 +151,7 @@ else
 fi
 
 ../configure \
-  --target=x86_64-apple-$TARGET \
+  --target=$TARGETTRIPLE \
   --with-sysroot=$SDK \
   --disable-nls \
   --enable-languages=$LANGS \
@@ -152,7 +168,7 @@ $MAKE install
 
 GCC_VERSION=`echo $GCC_VERSION | tr '-' ' ' |  awk '{print $1}'`
 
-pushd $TARGET_DIR/x86_64-apple-$TARGET/include &>/dev/null
+pushd $TARGET_DIR/$TARGETTRIPLE/include &>/dev/null
 pushd c++/${GCC_VERSION}* &>/dev/null
 
 cat $PATCH_DIR/libstdcxx.patch | \
@@ -165,7 +181,7 @@ popd &>/dev/null
 popd &>/dev/null # build
 popd &>/dev/null # gcc
 
-touch "have_gcc_${GCC_VERSION}_${TARGET}"
+touch "have_gcc_${GCC_VERSION}_${TARGETTRIPLE}"
 
 fi # have gcc
 
@@ -176,38 +192,45 @@ source tools/tools.sh
 
 pushd $TARGET_DIR/bin &>/dev/null
 
-if [ ! -f i386-apple-$TARGET-base-gcc ]; then
-  mv x86_64-apple-$TARGET-gcc \
-    x86_64-apple-$TARGET-base-gcc
+if [ ! -f $TARGETTRIPLE-base-gcc ]; then
+  mv $TARGETTRIPLE-gcc \
+    $TARGETTRIPLE-base-gcc
 
-  mv x86_64-apple-$TARGET-g++ \
-    x86_64-apple-$TARGET-base-g++
+  mv $TARGETTRIPLE-g++ \
+    $TARGETTRIPLE-base-g++
+fi
 
-  if [ $(osxcross-cmp $SDK_VERSION "<=" 10.13) -eq 1 ]; then
-    create_symlink x86_64-apple-$TARGET-base-gcc \
-                   i386-apple-$TARGET-base-gcc
+if [ "${TARGET_ARCH}" == "x86_64" ] && [ $(osxcross-cmp $SDK_VERSION "<=" 10.13) -eq 1 ] && [ ! -f i386-apple-$TARGET-base-gcc ]; then
+  create_symlink $TARGETTRIPLE-base-gcc \
+                 i386-apple-$TARGET-base-gcc
 
-    create_symlink x86_64-apple-$TARGET-base-g++ \
-                   i386-apple-$TARGET-base-g++
-  fi
+  create_symlink $TARGETTRIPLE-base-g++ \
+                 i386-apple-$TARGET-base-g++
 fi
 
 echo "compiling wrapper ..."
 
 TARGETCOMPILER=gcc \
+TARGETTRIPLE="${TARGETTRIPLE}" \
   $BASE_DIR/wrapper/build_wrapper.sh
 
 popd &>/dev/null # wrapper dir
 
 echo ""
 
-if [ $(osxcross-cmp $SDK_VERSION "<=" 10.13) -eq 1 ]; then
+if [ "$MY_TARGET_ARCH" == "x86_64" ] && [ $(osxcross-cmp $SDK_VERSION "<=" 10.13) -eq 1 ]; then
   test_compiler o32-gcc $BASE_DIR/oclang/test.c
   test_compiler o32-g++ $BASE_DIR/oclang/test.cpp
 fi
 
-test_compiler o64-gcc $BASE_DIR/oclang/test.c
-test_compiler o64-g++ $BASE_DIR/oclang/test.cpp
+if [ "$MY_TARGET_ARCH" == "x86_64" ]; then
+  SHORT_PREFIX=o64
+elif [ "$MY_TARGET_ARCH" == "aarch64" ]; then
+  SHORT_PREFIX=oa64
+fi
+
+test_compiler ${SHORT_PREFIX}-gcc $BASE_DIR/oclang/test.c
+test_compiler ${SHORT_PREFIX}-g++ $BASE_DIR/oclang/test.cpp
 
 echo ""
 

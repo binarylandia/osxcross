@@ -391,6 +391,7 @@ inline Compiler getCompilerIdentifier(const char *compilername) {
 //
 
 enum Arch {
+  aarch64,
   arm64,
   arm64e,
   i386,
@@ -403,6 +404,7 @@ enum Arch {
 };
 
 constexpr const char *ArchNames[] = {
+  "aarch64",
   "arm64",
   "arm64e",
   "i386",
@@ -419,9 +421,6 @@ constexpr const char *getArchName(Arch arch) {
 }
 
 inline Arch parseArch(const char *arch) {
-  if (!strcmp(arch, "aarch64")) // treat aarch64 as arm64
-    return Arch::arm64;
-
   size_t i = 0;
   for (auto archname : ArchNames) {
     if (!strcmp(arch, archname)) {

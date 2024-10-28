@@ -73,7 +73,7 @@ function create_wrapper_link
   fi
 
   verbose_cmd create_symlink "${TARGETTRIPLE}-wrapper" \
-    "x86_64-apple-${TARGET}-${1}"
+    "${TARGETTRIPLE}-${1}"
 
   if ([[ $1 != gcc* ]] && [[ $1 != g++* ]] && [[ $1 != *gstdc++ ]]); then
     if [ $X86_64H_SUPPORTED -eq 1 ]; then
@@ -97,16 +97,18 @@ function create_wrapper_link
         "o32-${1}"
     fi
 
-    verbose_cmd create_symlink "${TARGETTRIPLE}-wrapper" \
-      "o64-${1}"
+    if [[ "${TARGETTRIPLE}" == x86_64* ]]; then
+      verbose_cmd create_symlink "${TARGETTRIPLE}-wrapper" \
+        "o64-${1}"
+    fi
 
-    if [ $X86_64H_SUPPORTED -eq 1 ] &&
+    if [[ "${TARGETTRIPLE}" == x86_64* ]] && [ $X86_64H_SUPPORTED -eq 1 ] &&
        ([[ $1 != gcc* ]] && [[ $1 != g++* ]] && [[ $1 != *gstdc++ ]]); then
       verbose_cmd create_symlink "${TARGETTRIPLE}-wrapper" \
         "o64h-${1}"
     fi
 
-    if [ $ARM_SUPPORTED -eq 1 ]; then
+    if [[ "${TARGETTRIPLE}" == aarch64* ]] && [ $ARM_SUPPORTED -eq 1 ]; then
       verbose_cmd create_symlink "${TARGETTRIPLE}-wrapper" \
         "oa64-${1}"
       verbose_cmd create_symlink "${TARGETTRIPLE}-wrapper" \
@@ -117,7 +119,9 @@ function create_wrapper_link
 
 [ -z "$TARGETCOMPILER" ] && TARGETCOMPILER=clang
 
-TARGETTRIPLE=x86_64-apple-${TARGET}
+if [ -z "$TARGETTRIPLE" ]; then
+  TARGETTRIPLE=x86_64-apple-${TARGET}
+fi
 
 FLAGS=""
 
