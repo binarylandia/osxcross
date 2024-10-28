@@ -117,6 +117,7 @@ if [ $(osxcross-cmp $SDK_VERSION '>=' 10.14) -eq 1 ] &&
   echo ""
 fi
 
+./contrib/download_prerequisites
 
 mkdir -p build
 pushd build &>/dev/null
