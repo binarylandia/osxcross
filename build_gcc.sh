@@ -58,12 +58,12 @@ else
 fi
 popd &>/dev/null
 
-#echo "cleaning up ..."
-#rm -rf gcc-${GCC_VERSION}-${TARGETTRIPLE} 2>/dev/null
+echo "cleaning up ..."
+rm -rf gcc-${GCC_VERSION}-${TARGETTRIPLE} 2>/dev/null
 
 extract "$TARBALL_DIR/gcc-$GCC_VERSION.tar.xz"
 
-if [ -d "gcc-$GCC_VERSION" ]; then
+if [ -d "gcc-$GCC_VERSION" ] && [ ! -d "gcc-${GCC_VERSION}-${TARGETTRIPLE}" ]; then
   mv gcc-$GCC_VERSION gcc-${GCC_VERSION}-${TARGETTRIPLE}
 fi
 
