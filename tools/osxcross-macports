@@ -196,7 +196,7 @@ function download()
 
   if command -v curl &>/dev/null; then
     ## cURL ##
-    local curl_opts="-L -C - "
+    local curl_opts="-L"
     if [ -z "$VERBOSE" ]; then
       curl_opts+="-s "
     fi

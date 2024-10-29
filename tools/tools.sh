@@ -415,7 +415,7 @@ function download()
 
   if command -v curl &>/dev/null; then
     ## cURL ##
-    local curl_opts="-L -C - "
+    local curl_opts="-L"
     curl $curl_opts -o $filename $uri
   elif command -v wget &>/dev/null; then
     ## wget ##
