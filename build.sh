@@ -273,6 +273,7 @@ fi
 
 cp -f "$BASE_DIR/tools/toolchain.cmake" "$TARGET_DIR/"
 cp -f "$BASE_DIR/tools/osxcross-cmake" "$TARGET_DIR/bin/"
+cp -f "$BASE_DIR/tools/pkgutil" "$TARGET_DIR/bin/"
 
 chmod 755 "$TARGET_DIR/bin/osxcross-cmake"
 
