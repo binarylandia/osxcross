@@ -162,6 +162,8 @@ fi
   --disable-libstdcxx-pch \
   --prefix=$TARGET_DIR \
   --with-system-zlib \
+  --disable-shared \
+  LDFLAGS="-static-libstdc++ -static-libgcc" \
   $EXTRACONFFLAGS
 
 $MAKE -j$JOBS

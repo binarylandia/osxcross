@@ -61,7 +61,9 @@ function build_and_install()
       --program-prefix=$TARGET_ARCH-apple-$TARGET- \
       --prefix=$TARGET_DIR/binutils \
       --disable-nls \
-      --disable-werror
+      --disable-werror \
+      --disable-shared \
+      LDFLAGS="-static-libstdc++ -static-libgcc" \
 
     $MAKE -j$JOBS
     $MAKE install
