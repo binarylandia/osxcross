@@ -92,6 +92,7 @@ fi
 if [ $(osxcross-cmp $GCC_VERSION '==' 14.2.0) -eq 1 ]; then
   patch -p1 < $PATCH_DIR/gcc-14.2.0-r2.diff
   patch -p1 < $PATCH_DIR/gcc-14.2.0-libgcc-darwin-libemutls-no-shared.patch
+  patch -p1 < $PATCH_DIR/gcc-14.2.0-libgcc-darwin-libheapt-no-shared.patch
 fi
 
 if [ $(osxcross-cmp $SDK_VERSION '>=' 10.14) -eq 1 ] &&

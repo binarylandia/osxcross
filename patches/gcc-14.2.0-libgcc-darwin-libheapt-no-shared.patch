@@ -1,0 +1,48 @@
+diff --git a/libgcc/config.host b/libgcc/config.host
+index 7565549..c1ae3c8 100644
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -428,12 +428,15 @@ aarch64*-*-elf | aarch64*-*-rtems*)
+ 	md_unwind_header=aarch64/aarch64-unwind.h
+ 	;;
+ aarch64*-*-darwin*)
+-	extra_parts="$extra_parts crtfastmath.o libheapt_w.a"
++	extra_parts="$extra_parts crtfastmath.o"
++	if test x$enable_shared = xyes; then
++		extra_parts="$extra_parts libheapt_w.a"
++		tmake_file="${tmake_file} ${cpu_type}/t-heap-trampoline"
++	fi
+ 	tmake_file="${tmake_file} ${cpu_type}/t-aarch64"
+ 	tmake_file="${tmake_file} ${cpu_type}/t-lse"
+ 	tmake_file="${tmake_file} t-crtfm t-dfprules"
+ 	tmake_file="${tmake_file} ${cpu_type}/t-softfp t-softfp"
+-	tmake_file="${tmake_file} ${cpu_type}/t-heap-trampoline"
+ 	md_unwind_header=aarch64/aarch64-unwind.h
+ 	;;
+ aarch64*-*-freebsd*)
+@@ -743,15 +746,21 @@ i[34567]86-*-darwin*)
+ 	tmake_file="$tmake_file i386/t-crtpc t-crtfm i386/t-msabi"
+ 	tm_file="$tm_file i386/darwin-lib.h"
+ 	extra_parts="$extra_parts crtprec32.o crtprec64.o crtprec80.o"
+-	extra_parts="$extra_parts crtfastmath.o libd10-uwfef.a libheapt_w.a"
+-	tmake_file="${tmake_file} i386/t-heap-trampoline"
++	extra_parts="$extra_parts crtfastmath.o libd10-uwfef.a"
++	if test x$enable_shared = xyes; then
++		extra_parts="$extra_parts libheapt_w.a"
++		tmake_file="${tmake_file} i386/t-heap-trampoline"
++	fi
+ 	;;
+ x86_64-*-darwin*)
+ 	tmake_file="$tmake_file i386/t-crtpc t-crtfm i386/t-msabi"
+ 	tm_file="$tm_file i386/darwin-lib.h"
+ 	extra_parts="$extra_parts crtprec32.o crtprec64.o crtprec80.o"
+-	extra_parts="$extra_parts crtfastmath.o libd10-uwfef.a libheapt_w.a"
+-	tmake_file="${tmake_file} i386/t-heap-trampoline"
++	extra_parts="$extra_parts crtfastmath.o libd10-uwfef.a"
++	if test x$enable_shared = xyes; then
++		extra_parts="$extra_parts libheapt_w.a"
++		tmake_file="${tmake_file} i386/t-heap-trampoline"
++	fi
+ 	;;
+ i[34567]86-*-elfiamcu)
+ 	tmake_file="$tmake_file i386/t-crtstuff t-softfp-sfdftf i386/32/t-softfp i386/32/t-iamcu i386/t-softfp t-softfp t-dfprules"
