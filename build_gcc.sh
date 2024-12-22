@@ -9,8 +9,6 @@
 
 pushd "${0%/*}" &>/dev/null
 
-unset LIBRARY_PATH
-
 DESC=gcc
 USESYSTEMCOMPILER=1
 source tools/tools.sh
