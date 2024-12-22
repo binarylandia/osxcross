@@ -164,7 +164,12 @@ fi
   --prefix=$TARGET_DIR \
   --with-system-zlib \
   --disable-shared \
-  LDFLAGS="-static-libstdc++ -static-libgcc" \
+  --enable-static \
+  --enable-plugin \
+  --enable-gold=yes \
+  --enable-ld=yes \
+  --enable-lto=yes \
+  --enable-threads=yes \
   $EXTRACONFFLAGS
 
 $MAKE -j$JOBS
