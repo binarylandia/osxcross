@@ -160,7 +160,6 @@ fi
   --enable-checking=release \
   --disable-libstdcxx-pch \
   --prefix=$TARGET_DIR \
-  --with-system-zlib \
   --disable-shared \
   --enable-static \
   --enable-plugin \
