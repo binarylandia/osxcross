@@ -1,3 +1,5 @@
+> [!IMPORTANT]
+> This fork is retired. [binarylandia/build_osxcross](https://github.com/binarylandia/build_osxcross) builds osxcross from the upstream repository [tpoechtrager/osxcross](https://github.com/tpoechtrager/osxcross).
 
 ## macOS Cross toolchain for Linux and *BSD ##
 
